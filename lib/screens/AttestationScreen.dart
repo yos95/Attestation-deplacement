@@ -26,45 +26,6 @@ class attestationScreen extends StatefulWidget {
   _attestationScreenState createState() => _attestationScreenState();
 }
 
-class MySelectionItem extends StatelessWidget {
-  final String title;
-  final bool isForList;
-  const MySelectionItem({Key key, this.title, this.isForList = true})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 60.0,
-      child: isForList
-          ? Padding(
-              child: _buildItem(context),
-              padding: EdgeInsets.all(10.0),
-            )
-          : Card(
-              margin: EdgeInsets.symmetric(horizontal: 10.0),
-              child: Stack(
-                children: <Widget>[
-                  _buildItem(context),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(Icons.arrow_drop_down),
-                  )
-                ],
-              ),
-            ),
-    );
-  }
-
-  _buildItem(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      alignment: Alignment.center,
-      child: Text(title),
-    );
-  }
-}
-
 class _WatermarkPaint extends CustomPainter {
   final String price;
   final String watermark;
@@ -99,21 +60,15 @@ class _attestationScreenState extends State<attestationScreen> {
     restore();
   }
 
-  final listMotifs = [
+  List<String> listMotifs = [
     "Achats de première nécessité",
     "Travail",
     "Hopital",
     "Famille agée",
     "Exercice physique",
   ];
-  int selectedIndex1 = 0;
-  List<Widget> _buildItems1() {
-    return listMotifs
-        .map((val) => MySelectionItem(
-              title: val,
-            ))
-        .toList();
-  }
+
+  String selectedIndex;
 
   save(String key, dynamic value) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
@@ -134,13 +89,15 @@ class _attestationScreenState extends State<attestationScreen> {
   var color = Colors.black;
   var strokeWidth = 5.0;
   final _sign = GlobalKey<SignatureState>();
-  var dateFormated;
+  var dateFormated = "";
   var signature;
-  var name;
-  var adresse;
-  var motif;
-  var ville;
+
+  var adresse = "";
+  var motif = "";
+  var ville = "";
+  var name = "";
   DateTime date;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -199,23 +156,32 @@ class _attestationScreenState extends State<attestationScreen> {
                         hintText: "Entrer votre nom",
                         icon: Icons.people,
                         OnChanged: (value) {
-                          name = value;
+                          setState(() {
+                            name = value;
+                          });
+                          save('name', value);
                         },
                         typePassword: false),
                     WidgetTextfield(
-                        initialValue: adresse,
+                        initialValue: adresse ?? "",
                         hintText: "Entrer votre adresse",
                         icon: Icons.place,
                         OnChanged: (value) {
-                          adresse = value;
+                          setState(() {
+                            adresse = value;
+                          });
+                          save('adresse', value);
                         },
                         typePassword: false),
                     WidgetTextfield(
-                        initialValue: ville,
+                        initialValue: ville == null ? "" : ville,
                         hintText: "Entrer votre ville",
                         icon: Icons.place,
                         OnChanged: (value) {
-                          ville = value;
+                          setState(() {
+                            ville = value;
+                          });
+                          save('ville', value);
                         },
                         typePassword: false),
                     WidgetDatetime(
@@ -232,17 +198,6 @@ class _attestationScreenState extends State<attestationScreen> {
                         );
                       },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10.0, top: 10, bottom: 10),
-                      child: Text(
-                        "Pour quelle motif ?",
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 19),
-                      ),
-                    ),
                     Container(
                       decoration: new BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
@@ -250,20 +205,29 @@ class _attestationScreenState extends State<attestationScreen> {
                       ),
                       width: 340,
                       height: 50,
-                      child: DirectSelect(
-                          itemExtent: 75.0,
-                          selectedIndex: selectedIndex1,
-                          child: MySelectionItem(
-                            isForList: true,
-                            title: listMotifs[selectedIndex1],
-                          ),
-                          onSelectedItemChanged: (index) {
+                      child: Center(
+                        child: DropdownButton(
+                          hint: Text('Pour quelle motif ?',
+                              style: TextStyle(
+                                color: Colors.black,
+                              )), // Not necessary for Option 1
+                          value: motif == null
+                              ? "Achats de première nécessité"
+                              : motif,
+                          onChanged: (newValue) {
                             setState(() {
-                              selectedIndex1 = index;
-                              motif = listMotifs[index];
+                              motif = newValue;
                             });
+                            save('motif', newValue);
                           },
-                          items: _buildItems1()),
+                          items: listMotifs.map((location) {
+                            return DropdownMenuItem(
+                              child: new Text(location),
+                              value: location,
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
@@ -316,28 +280,28 @@ class _attestationScreenState extends State<attestationScreen> {
                         print(date);
                         if (date == null) {
                         } else {
-                          dateFormated = date.day.toString() +
+                          print('elsa');
+                          var month = date.month;
+                          var day = date.day;
+                          var monthFormated, dayFormated;
+                          if (month < 10) {
+                            monthFormated = "0" + month.toString();
+                          } else {
+                            monthFormated = month.toString();
+                          }
+                          if (day < 10) {
+                            dayFormated = "0" + day.toString();
+                          } else {
+                            dayFormated = day.toString();
+                          }
+                          dateFormated = dayFormated.toString() +
                               "/" +
-                              date.month.toString() +
+                              monthFormated.toString() +
                               "/" +
                               date.year.toString();
                         }
 
-                        print(adresse.toString());
-                        print(name);
-                        print(motif);
-                        print("name sauvegarde");
-                        print(name);
-
-                        save('adresse', adresse);
-                        save('name', name);
-                        save('motif', motif);
-                        save('ville', ville);
-                        save('date', dateFormated);
-                        final SharedPreferences sharedPrefs =
-                            await SharedPreferences.getInstance();
-
-                        sharedPrefs.setInt('indexMotif', selectedIndex1);
+                        save('date', dateFormated.toString());
 
                         final pdf = pw.Document();
                         final imageX = PdfImage(
@@ -424,30 +388,13 @@ class _attestationScreenState extends State<attestationScreen> {
 
   restore() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-    sharedPrefs.clear();
+
     setState(() {
-      print("restore");
-      if (sharedPrefs.containsKey('motif') &&
-          sharedPrefs.containsKey('dateFormated') &&
-          sharedPrefs.containsKey('adresse') &&
-          sharedPrefs.containsKey('ville') &&
-          sharedPrefs.containsKey('name') &&
-          sharedPrefs.containsKey('selectedIndex1')) {
-        motif = (sharedPrefs.getString('motif') ?? false);
-        dateFormated = (sharedPrefs.getString('date') ?? false);
-        adresse = (sharedPrefs.getString('adresse') ?? false);
-        ville = (sharedPrefs.getString('ville') ?? false);
-        name = (sharedPrefs.getString('name') ?? false);
-        selectedIndex1 = (sharedPrefs.getInt('indexMotif') ?? false);
-      } else {
-        print("elsssssssssssssssssssdssssssssssss");
-        motif = "az";
-        dateFormated = "fff";
-        adresse = "az";
-        ville = "az";
-        name = "az";
-        selectedIndex1 = 0;
-      }
+      motif = (sharedPrefs.getString('motif') ?? false);
+      dateFormated = (sharedPrefs.getString('date') ?? false);
+      adresse = (sharedPrefs.getString('adresse') ?? false);
+      ville = (sharedPrefs.getString('ville') ?? false);
+      name = (sharedPrefs.getString('name') ?? false);
 
       //TODO: More restoring of settings would go here...
     });

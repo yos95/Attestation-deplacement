@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future loginWithDb() async {
     Future.delayed(const Duration(milliseconds: 500), () {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => StartScreen()),
       );

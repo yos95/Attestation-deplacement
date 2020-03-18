@@ -22,7 +22,7 @@ class WidgetButton extends StatelessWidget {
       width: double.infinity,
       height: 70,
       padding: const EdgeInsets.only(left: 23, top: 10, right: 23, bottom: 10),
-      child: RaisedButton(
+      child: FlatButton(
         padding: const EdgeInsets.all(0.0),
         shape: new RoundedRectangleBorder(
             borderRadius: new BorderRadius.circular(30.0),
@@ -32,13 +32,17 @@ class WidgetButton extends StatelessWidget {
             )),
         onPressed: OnPressed,
         textColor: colorText,
-        color: colorBack,
+        color: Colors.transparent,
         child: Container(
           width: double.infinity,
           padding:
               const EdgeInsets.only(left: 23, top: 10, right: 23, bottom: 10),
           decoration: new BoxDecoration(
               borderRadius: new BorderRadius.circular(30.0),
+              border: Border.all(
+                width: 0,
+                style: BorderStyle.none,
+              ),
               gradient: new LinearGradient(
                 colors: [colorGradOne, colorGradTwo],
               )),
