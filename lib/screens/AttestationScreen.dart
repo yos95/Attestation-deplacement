@@ -53,8 +53,37 @@ class _WatermarkPaint extends CustomPainter {
 }
 
 class _attestationScreenState extends State<attestationScreen> {
+  TextEditingController controllerName, controllerVille, controllerAdresse;
+  var dateFormated = "";
+  var signature;
+  var adresse = "";
+  var motif = "Achats de première nécessité";
+  var ville = "";
+  var name = "";
+  DateTime date;
+
+  restore() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      print(sharedPrefs.getString('adresse'));
+      name = (sharedPrefs.getString('name'));
+
+      dateFormated = (sharedPrefs.getString('date'));
+      adresse = (sharedPrefs.getString('adresse'));
+      ville = (sharedPrefs.getString('ville'));
+      motif = (sharedPrefs.getString('motif'));
+
+      controllerName = TextEditingController(text: name);
+      controllerVille = TextEditingController(text: ville);
+      controllerAdresse = TextEditingController(text: adresse);
+
+      //TODO: More restoring of settings would go here...
+    });
+  }
+
   @override
-  void initState() {
+  initState() {
     // TODO: implement initState
     super.initState();
     restore();
@@ -70,33 +99,16 @@ class _attestationScreenState extends State<attestationScreen> {
 
   String selectedIndex;
 
-  save(String key, dynamic value) async {
+  save(String key, String value) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-    if (value is bool) {
-      sharedPrefs.setBool(key, value);
-    } else if (value is String) {
-      sharedPrefs.setString(key, value);
-    } else if (value is int) {
-      sharedPrefs.setInt(key, value);
-    } else if (value is double) {
-      sharedPrefs.setDouble(key, value);
-    } else if (value is List<String>) {
-      sharedPrefs.setStringList(key, value);
-    }
+
+    sharedPrefs.setString(key, value);
   }
 
   ByteData _img = ByteData(0);
   var color = Colors.black;
   var strokeWidth = 5.0;
   final _sign = GlobalKey<SignatureState>();
-  var dateFormated = "";
-  var signature;
-
-  var adresse = "";
-  var motif = "";
-  var ville = "";
-  var name = "";
-  DateTime date;
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +164,7 @@ class _attestationScreenState extends State<attestationScreen> {
                 child: Column(
                   children: <Widget>[
                     WidgetTextfield(
-                        initialValue: name,
+                        controller: controllerName,
                         hintText: "Entrer votre nom",
                         icon: Icons.people,
                         OnChanged: (value) {
@@ -163,7 +175,7 @@ class _attestationScreenState extends State<attestationScreen> {
                         },
                         typePassword: false),
                     WidgetTextfield(
-                        initialValue: adresse ?? "",
+                        controller: controllerAdresse,
                         hintText: "Entrer votre adresse",
                         icon: Icons.place,
                         OnChanged: (value) {
@@ -174,7 +186,7 @@ class _attestationScreenState extends State<attestationScreen> {
                         },
                         typePassword: false),
                     WidgetTextfield(
-                        initialValue: ville == null ? "" : ville,
+                        controller: controllerVille,
                         hintText: "Entrer votre ville",
                         icon: Icons.place,
                         OnChanged: (value) {
@@ -211,9 +223,7 @@ class _attestationScreenState extends State<attestationScreen> {
                               style: TextStyle(
                                 color: Colors.black,
                               )), // Not necessary for Option 1
-                          value: motif == null
-                              ? "Achats de première nécessité"
-                              : motif,
+                          value: motif,
                           onChanged: (newValue) {
                             setState(() {
                               motif = newValue;
@@ -302,7 +312,20 @@ class _attestationScreenState extends State<attestationScreen> {
                         }
 
                         save('date', dateFormated.toString());
-
+                        var monthNow = DateTime.now().month;
+                        var dayNow = DateTime.now().day;
+                        var yearNow = DateTime.now().year;
+                        var monthNowFormated, dayNowFormated;
+                        if (monthNow < 10) {
+                          monthNowFormated = "0" + monthNow.toString();
+                        } else {
+                          monthNowFormated = monthNow.toString();
+                        }
+                        if (dayNow < 10) {
+                          dayNowFormated = "0" + dayNow.toString();
+                        } else {
+                          dayNowFormated = dayNow.toString();
+                        }
                         final pdf = pw.Document();
                         final imageX = PdfImage(
                           pdf.document,
@@ -350,11 +373,11 @@ class _attestationScreenState extends State<attestationScreen> {
                                   ),
                                   pw.Text(
                                       'Le ' +
-                                          DateTime.now().day.toString() +
+                                          dayNowFormated.toString() +
                                           "/" +
-                                          DateTime.now().month.toString() +
+                                          monthNowFormated.toString() +
                                           "/" +
-                                          DateTime.now().year.toString() +
+                                          yearNow.toString() +
                                           ' a ' +
                                           ville,
                                       textScaleFactor: 1.2),
@@ -384,19 +407,5 @@ class _attestationScreenState extends State<attestationScreen> {
         ],
       ),
     );
-  }
-
-  restore() async {
-    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      motif = (sharedPrefs.getString('motif') ?? false);
-      dateFormated = (sharedPrefs.getString('date') ?? false);
-      adresse = (sharedPrefs.getString('adresse') ?? false);
-      ville = (sharedPrefs.getString('ville') ?? false);
-      name = (sharedPrefs.getString('name') ?? false);
-
-      //TODO: More restoring of settings would go here...
-    });
   }
 }

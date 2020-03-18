@@ -1,37 +1,43 @@
 import 'package:flutter/material.dart';
 
-class WidgetTextfield extends StatelessWidget {
+class WidgetTextfield extends StatefulWidget {
   WidgetTextfield(
       {this.hintText,
       this.icon,
       this.OnChanged,
       this.typePassword,
-      this.initialValue});
+      this.controller});
   final String hintText;
   final IconData icon;
   final Function OnChanged;
   final bool typePassword;
-  final String initialValue;
+  final TextEditingController controller;
+
+  @override
+  _WidgetTextfieldState createState() => _WidgetTextfieldState();
+}
+
+class _WidgetTextfieldState extends State<WidgetTextfield> {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, top: 5, right: 20, bottom: 5),
-      child: TextFormField(
-        initialValue: initialValue,
+      child: TextField(
+        controller: widget.controller,
         autofocus: false,
         textAlign: TextAlign.left,
         keyboardType: TextInputType.text,
-        obscureText: typePassword,
-        onChanged: OnChanged,
+        obscureText: widget.typePassword,
+        onChanged: widget.OnChanged,
         decoration: InputDecoration(
           prefixIcon: Container(
             margin: EdgeInsets.only(left: 10),
             child: Icon(
-              icon,
+              widget.icon,
               color: Color(0xff201F28),
             ),
           ),
-          hintText: hintText,
+          hintText: widget.hintText,
           hintStyle: TextStyle(
             fontFamily: "OpenSans-SemiBold",
             fontSize: 15,
