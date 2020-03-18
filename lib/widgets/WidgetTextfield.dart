@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 
 class WidgetTextfield extends StatelessWidget {
   WidgetTextfield(
-      {this.hintText, this.icon, this.OnChanged, this.typePassword});
+      {this.hintText,
+      this.icon,
+      this.OnChanged,
+      this.typePassword,
+      this.initialValue});
   final String hintText;
   final IconData icon;
   final Function OnChanged;
   final bool typePassword;
+  final String initialValue;
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, top: 5, right: 20, bottom: 5),
-      child: TextField(
+      child: TextFormField(
+        initialValue: initialValue,
         autofocus: false,
         textAlign: TextAlign.left,
         keyboardType: TextInputType.text,

@@ -92,6 +92,13 @@ class _WatermarkPaint extends CustomPainter {
 }
 
 class _attestationScreenState extends State<attestationScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    restore();
+  }
+
   final listMotifs = [
     "Achats de première nécessité",
     "Travail",
@@ -108,10 +115,26 @@ class _attestationScreenState extends State<attestationScreen> {
         .toList();
   }
 
+  save(String key, dynamic value) async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    if (value is bool) {
+      sharedPrefs.setBool(key, value);
+    } else if (value is String) {
+      sharedPrefs.setString(key, value);
+    } else if (value is int) {
+      sharedPrefs.setInt(key, value);
+    } else if (value is double) {
+      sharedPrefs.setDouble(key, value);
+    } else if (value is List<String>) {
+      sharedPrefs.setStringList(key, value);
+    }
+  }
+
   ByteData _img = ByteData(0);
   var color = Colors.black;
   var strokeWidth = 5.0;
   final _sign = GlobalKey<SignatureState>();
+  var dateFormated;
   var signature;
   var name;
   var adresse;
@@ -172,6 +195,7 @@ class _attestationScreenState extends State<attestationScreen> {
                 child: Column(
                   children: <Widget>[
                     WidgetTextfield(
+                        initialValue: name,
                         hintText: "Entrer votre nom",
                         icon: Icons.people,
                         OnChanged: (value) {
@@ -179,6 +203,7 @@ class _attestationScreenState extends State<attestationScreen> {
                         },
                         typePassword: false),
                     WidgetTextfield(
+                        initialValue: adresse,
                         hintText: "Entrer votre adresse",
                         icon: Icons.place,
                         OnChanged: (value) {
@@ -186,6 +211,7 @@ class _attestationScreenState extends State<attestationScreen> {
                         },
                         typePassword: false),
                     WidgetTextfield(
+                        initialValue: ville,
                         hintText: "Entrer votre ville",
                         icon: Icons.place,
                         OnChanged: (value) {
@@ -288,14 +314,30 @@ class _attestationScreenState extends State<attestationScreen> {
                         });
                         debugPrint("onPressed " + encoded);
                         print(date);
-                        var dateFormated = date.day.toString() +
-                            "/" +
-                            date.month.toString() +
-                            "/" +
-                            date.year.toString();
+                        if (date == null) {
+                        } else {
+                          dateFormated = date.day.toString() +
+                              "/" +
+                              date.month.toString() +
+                              "/" +
+                              date.year.toString();
+                        }
+
                         print(adresse.toString());
                         print(name);
                         print(motif);
+                        print("name sauvegarde");
+                        print(name);
+
+                        save('adresse', adresse);
+                        save('name', name);
+                        save('motif', motif);
+                        save('ville', ville);
+                        save('date', dateFormated);
+                        final SharedPreferences sharedPrefs =
+                            await SharedPreferences.getInstance();
+
+                        sharedPrefs.setInt('indexMotif', selectedIndex1);
 
                         final pdf = pw.Document();
                         final imageX = PdfImage(
@@ -378,5 +420,36 @@ class _attestationScreenState extends State<attestationScreen> {
         ],
       ),
     );
+  }
+
+  restore() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    sharedPrefs.clear();
+    setState(() {
+      print("restore");
+      if (sharedPrefs.containsKey('motif') &&
+          sharedPrefs.containsKey('dateFormated') &&
+          sharedPrefs.containsKey('adresse') &&
+          sharedPrefs.containsKey('ville') &&
+          sharedPrefs.containsKey('name') &&
+          sharedPrefs.containsKey('selectedIndex1')) {
+        motif = (sharedPrefs.getString('motif') ?? false);
+        dateFormated = (sharedPrefs.getString('date') ?? false);
+        adresse = (sharedPrefs.getString('adresse') ?? false);
+        ville = (sharedPrefs.getString('ville') ?? false);
+        name = (sharedPrefs.getString('name') ?? false);
+        selectedIndex1 = (sharedPrefs.getInt('indexMotif') ?? false);
+      } else {
+        print("elsssssssssssssssssssdssssssssssss");
+        motif = "az";
+        dateFormated = "fff";
+        adresse = "az";
+        ville = "az";
+        name = "az";
+        selectedIndex1 = 0;
+      }
+
+      //TODO: More restoring of settings would go here...
+    });
   }
 }
