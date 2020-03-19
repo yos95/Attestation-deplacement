@@ -1,58 +1,28 @@
 import 'dart:io';
 
-import 'package:confinement/models/reportView.dart';
+import 'package:confinement/models/BrainAttestation.dart';
+import 'package:confinement/models/WatermarkPaint.dart';
 import 'package:confinement/screens/pdfWiewerScreen.dart';
 import 'package:confinement/widgets/WidgetButton.dart';
 import 'package:confinement/widgets/WidgetDatetime.dart';
 import 'package:confinement/widgets/WidgetTextfield.dart';
-import 'package:floating_search_bar/floating_search_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:pdf/pdf.dart';
+
 import 'package:flutter_signature_pad/flutter_signature_pad.dart';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_rounded_date_picker/rounded_picker.dart';
 import 'package:flutter/material.dart' as material;
-import 'package:direct_select/direct_select.dart';
-
-import 'package:pdf/widgets.dart' as pw;
 
 class attestationScreen extends StatefulWidget {
   @override
   _attestationScreenState createState() => _attestationScreenState();
 }
 
-class _WatermarkPaint extends CustomPainter {
-  final String price;
-  final String watermark;
-
-  _WatermarkPaint(this.price, this.watermark);
-
-  @override
-  void paint(ui.Canvas canvas, ui.Size size) {}
-
-  @override
-  bool shouldRepaint(_WatermarkPaint oldDelegate) {
-    return oldDelegate != this;
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is _WatermarkPaint &&
-          runtimeType == other.runtimeType &&
-          price == other.price &&
-          watermark == other.watermark;
-
-  @override
-  int get hashCode => price.hashCode ^ watermark.hashCode;
-}
-
 class _attestationScreenState extends State<attestationScreen> {
+  brain brainA = new brain();
   TextEditingController controllerName, controllerVille, controllerAdresse;
   var dateFormated = "";
   var signature;
@@ -62,6 +32,22 @@ class _attestationScreenState extends State<attestationScreen> {
   var name = "";
   DateTime date;
 
+  List<String> listMotifs = [
+    "Achats de première nécessité",
+    "Travail",
+    "Hopital",
+    "Famille agée",
+    "Exercice physique",
+  ];
+
+  String selectedIndex;
+
+  ByteData img = ByteData(0);
+  var color = Colors.black;
+  var strokeWidth = 5.0;
+  final _sign = GlobalKey<SignatureState>();
+  var monthNowFormated, dayNowFormated;
+  var yearNow = DateTime.now().year;
   restore() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
 
@@ -88,27 +74,6 @@ class _attestationScreenState extends State<attestationScreen> {
     super.initState();
     restore();
   }
-
-  List<String> listMotifs = [
-    "Achats de première nécessité",
-    "Travail",
-    "Hopital",
-    "Famille agée",
-    "Exercice physique",
-  ];
-
-  String selectedIndex;
-
-  save(String key, String value) async {
-    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-
-    sharedPrefs.setString(key, value);
-  }
-
-  ByteData _img = ByteData(0);
-  var color = Colors.black;
-  var strokeWidth = 5.0;
-  final _sign = GlobalKey<SignatureState>();
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +136,7 @@ class _attestationScreenState extends State<attestationScreen> {
                           setState(() {
                             name = value;
                           });
-                          save('name', value);
+                          brain.save('name', value);
                         },
                         typePassword: false),
                     WidgetTextfield(
@@ -182,7 +147,7 @@ class _attestationScreenState extends State<attestationScreen> {
                           setState(() {
                             adresse = value;
                           });
-                          save('adresse', value);
+                          brain.save('adresse', value);
                         },
                         typePassword: false),
                     WidgetTextfield(
@@ -193,7 +158,7 @@ class _attestationScreenState extends State<attestationScreen> {
                           setState(() {
                             ville = value;
                           });
-                          save('ville', value);
+                          brain.save('ville', value);
                         },
                         typePassword: false),
                     WidgetDatetime(
@@ -228,7 +193,7 @@ class _attestationScreenState extends State<attestationScreen> {
                             setState(() {
                               motif = newValue;
                             });
-                            save('motif', newValue);
+                            brain.save('motif', newValue);
                           },
                           items: listMotifs.map((location) {
                             return DropdownMenuItem(
@@ -260,16 +225,13 @@ class _attestationScreenState extends State<attestationScreen> {
                             key: _sign,
                             onSign: () {
                               final sign = _sign.currentState;
-                              debugPrint(
-                                  '${sign.points.length} points in the signature');
                             },
-                            backgroundPainter: _WatermarkPaint("2.0", "2.0"),
+                            backgroundPainter: WatermarkPaint("2.0", "2.0"),
                             strokeWidth: strokeWidth,
                           ),
                         ),
                       ),
                     ),
-                    Container(),
                     WidgetButton(
                       colorGradOne: Color(0xFF50BEE4),
                       colorGradTwo: Color(0xFFAB3A85),
@@ -284,119 +246,38 @@ class _attestationScreenState extends State<attestationScreen> {
                         final encoded =
                             base64.encode(data.buffer.asUint8List());
                         setState(() {
-                          _img = data;
+                          img = data;
                         });
-                        debugPrint("onPressed " + encoded);
-                        print(date);
-                        if (date == null) {
-                        } else {
-                          print('elsa');
-                          var month = date.month;
-                          var day = date.day;
-                          var monthFormated, dayFormated;
-                          if (month < 10) {
-                            monthFormated = "0" + month.toString();
-                          } else {
-                            monthFormated = month.toString();
-                          }
-                          if (day < 10) {
-                            dayFormated = "0" + day.toString();
-                          } else {
-                            dayFormated = day.toString();
-                          }
-                          dateFormated = dayFormated.toString() +
-                              "/" +
-                              monthFormated.toString() +
-                              "/" +
-                              date.year.toString();
-                        }
 
-                        save('date', dateFormated.toString());
-                        var monthNow = DateTime.now().month;
-                        var dayNow = DateTime.now().day;
-                        var yearNow = DateTime.now().year;
-                        var monthNowFormated, dayNowFormated;
-                        if (monthNow < 10) {
-                          monthNowFormated = "0" + monthNow.toString();
-                        } else {
-                          monthNowFormated = monthNow.toString();
-                        }
-                        if (dayNow < 10) {
-                          dayNowFormated = "0" + dayNow.toString();
-                        } else {
-                          dayNowFormated = dayNow.toString();
-                        }
-                        final pdf = pw.Document();
-                        final imageX = PdfImage(
-                          pdf.document,
-                          image: _img.buffer.asUint8List(),
-                          width: image.width,
-                          height: image.height,
-                        );
-                        pdf.addPage(pw.Page(
-                            pageFormat: PdfPageFormat.a4,
-                            build: (pw.Context context) {
-                              return pw.Column(
-                                children: <pw.Widget>[
-                                  pw.Container(
-                                    child: pw.Column(
-                                      crossAxisAlignment:
-                                          pw.CrossAxisAlignment.start,
-                                      children: <pw.Widget>[
-                                        pw.Text(
-                                          'ATTESTATION DE DÉPLACEMENT DÉROGATOIRE',
-                                          textScaleFactor: 1.6,
-                                          style: pw.TextStyle(
-                                            fontWeight: pw.FontWeight.bold,
-                                            decoration:
-                                                pw.TextDecoration.underline,
-                                          ),
-                                        ),
-                                        pw.SizedBox(height: 20),
-                                        pw.Text(
-                                            'En application de l\'article 1er du décret du 16 mars 2020 portant réglementation des déplacements dans le cadre de la lutte contre la propagation du virus Covid-19',
-                                            textScaleFactor: 0.9),
-                                        pw.SizedBox(height: 60),
-                                        pw.Text('Je soussigné(e) ' + name,
-                                            textScaleFactor: 2.4),
-                                        pw.Text('né(e) le ' + dateFormated,
-                                            textScaleFactor: 2.4),
-                                        pw.Text('demeurant au ' + adresse,
-                                            textScaleFactor: 2.4),
-                                        pw.Text(
-                                            'certifie me rendre à l\'éxterieur pour le motif: ' +
-                                                motif,
-                                            textScaleFactor: 2.4),
-                                        pw.SizedBox(height: 80),
-                                      ],
-                                    ),
-                                  ),
-                                  pw.Text(
-                                      'Le ' +
-                                          dayNowFormated.toString() +
-                                          "/" +
-                                          monthNowFormated.toString() +
-                                          "/" +
-                                          yearNow.toString() +
-                                          ' a ' +
-                                          ville,
-                                      textScaleFactor: 1.2),
-                                  pw.Image(imageX),
-                                ],
-                              ); // Center
-                            }));
+                        dateFormated = brain.formatedDate(date, dateFormated);
 
-                        final String dir =
-                            (await getApplicationDocumentsDirectory()).path;
-                        final String path = '$dir/report.pdf';
-                        final File file = File(path);
-                        await file.writeAsBytes(pdf.save());
+                        brain.save('date', dateFormated.toString());
+
+                        monthNowFormated =
+                            brain.formatedDateNow(DateTime.now().month);
+                        dayNowFormated =
+                            brain.formatedDateNow(DateTime.now().day);
+                        var path = await brain.pdf(
+                            img,
+                            image,
+                            name,
+                            dateFormated,
+                            adresse,
+                            motif,
+                            dayNowFormated,
+                            monthNowFormated,
+                            yearNow,
+                            ville);
+                        print(path);
+
                         material.Navigator.of(context).push(
                           material.MaterialPageRoute(
-                            builder: (_) => PdfViewerPage(path: path),
+                            builder: (_) => PdfViewerPage(
+                              path: path.path,
+                              Bytes: path.Bytes,
+                            ),
                           ),
                         );
-                        reportView(context);
                       },
                     ),
                   ],

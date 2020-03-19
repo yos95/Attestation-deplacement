@@ -27,14 +27,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   provider:
-  fancy_bottom_navigation:
-  floating_search_bar:
   logger:
-  google_maps_flutter:
-  geolocator:
   font_awesome_flutter:
   intl:
-  sqflite:
   path_provider:
   flutter_svg: ^0.16.1
   flutter_icons: ^1.0.0+1
@@ -42,9 +37,8 @@ dependencies:
   flutter_signature_pad: ^2.0.1
   flutter_rounded_date_picker: ^1.0.4
   flutter_full_pdf_viewer : ^ 1.0.6
-  direct_select: ^1.0.0
   shared_preferences: ^0.5.6+3
-
+  printing: any
 dev_dependencies:
   flutter_launcher_icons: "^0.7.0"
 flutter_icons:

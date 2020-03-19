@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "814092815087",
+    "firebase_url": "https://atttestation-deplacement.firebaseio.com",
+    "project_id": "atttestation-deplacement",
+    "storage_bucket": "atttestation-deplacement.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814092815087:android:d34fb2f8f168618be9e91a",
+        "android_client_info": {
+          "package_name": "com.OneFlutter.confinement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "814092815087-p6dgsld9a7puaapvoei1l8bhbua7otgd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBs6pbUvAICFHZvonzKTjOQ_IOVhFZZrsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "814092815087-p6dgsld9a7puaapvoei1l8bhbua7otgd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
