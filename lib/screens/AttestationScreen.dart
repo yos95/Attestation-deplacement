@@ -63,7 +63,13 @@ class _attestationScreenState extends State<attestationScreen> {
       adresse = (sharedPrefs.getString('adresse'));
       ville = (sharedPrefs.getString('ville'));
       motif = (sharedPrefs.getString('motif'));
-
+      sexe = (sharedPrefs.getBool('sexe'));
+      if (sexe) {
+        print(sexe);
+        _defaultSexe = Sexe.Homme;
+      } else {
+        _defaultSexe = Sexe.Femme;
+      }
       controllerName = TextEditingController(text: name);
       controllerVille = TextEditingController(text: ville);
       controllerAdresse = TextEditingController(text: adresse);
@@ -296,7 +302,9 @@ class _attestationScreenState extends State<attestationScreen> {
                         dateFormated = brain.formatedDate(date, dateFormated);
 
                         brain.save('date', dateFormated.toString());
-
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        prefs.setBool('sexe', sexe);
                         monthNowFormated =
                             brain.formatedDateNow(DateTime.now().month);
                         dayNowFormated =
