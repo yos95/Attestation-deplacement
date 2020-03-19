@@ -63,7 +63,7 @@ class _attestationScreenState extends State<attestationScreen> {
       adresse = (sharedPrefs.getString('adresse'));
       ville = (sharedPrefs.getString('ville'));
       motif = (sharedPrefs.getString('motif'));
-      sexe = (sharedPrefs.getBool('sexe'));
+      sexe = (sharedPrefs.getBool('sexe') ?? true);
       if (sexe) {
         print(sexe);
         _defaultSexe = Sexe.Homme;
@@ -309,6 +309,8 @@ class _attestationScreenState extends State<attestationScreen> {
                             brain.formatedDateNow(DateTime.now().month);
                         dayNowFormated =
                             brain.formatedDateNow(DateTime.now().day);
+                        print('sexe ::::' + sexe.toString());
+                        print('default ::::' + _defaultSexe.toString());
 
                         var path = await brain.pdf(
                             img,
