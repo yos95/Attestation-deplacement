@@ -50,8 +50,10 @@ class brain {
     }
   }
 
-  static Future<print> pdf(img, image, name, dateFormated, adresse, motif,
-      dayNowFormated, monthNowFormated, yearNow, ville) async {
+  static Future<printPdf> pdf(img, image, name, dateFormated, adresse, motif,
+      dayNowFormated, monthNowFormated, yearNow, ville, sexe) async {
+    print(sexe);
+
     final pdf = pw.Document();
     final imageX = PdfImage(
       pdf.document,
@@ -59,6 +61,7 @@ class brain {
       width: image.width,
       height: image.height,
     );
+
     pdf.addPage(pw.Page(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
@@ -81,7 +84,10 @@ class brain {
                         'En application de l\'article 1er du décret du 16 mars 2020 portant réglementation des déplacements dans le cadre de la lutte contre la propagation du virus Covid-19',
                         textScaleFactor: 0.9),
                     pw.SizedBox(height: 60),
-                    pw.Text('Je soussigné(e) ' + name, textScaleFactor: 2.4),
+                    sexe
+                        ? pw.Text('Je soussigné ' + name, textScaleFactor: 2.4)
+                        : pw.Text('Je soussignée ' + name,
+                            textScaleFactor: 2.4),
                     pw.Text('né(e) le ' + dateFormated, textScaleFactor: 2.4),
                     pw.Text('demeurant au ' + adresse, textScaleFactor: 2.4),
                     pw.Text(
@@ -106,13 +112,14 @@ class brain {
             ],
           ); // Center
         }));
-
-    final String dir = (await getApplicationDocumentsDirectory()).path;
+    final String dir = (await getTemporaryDirectory()).path;
     final String path = '$dir/attestation_deplacement.pdf';
     final File file = File(path);
-    var Bytes = pdf.save();
+    file.writeAsBytesSync(pdf.save());
 
-    print prints = print(path, Bytes);
+    var Bytes = await pdf.save();
+
+    printPdf prints = printPdf(path, Bytes);
     return prints;
   }
 }

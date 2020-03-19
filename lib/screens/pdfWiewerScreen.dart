@@ -12,8 +12,24 @@ class PdfViewerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(path);
     return PDFViewerScaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: Container(
+            child: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () async {
+                final String dir =
+                    (await getApplicationDocumentsDirectory()).path;
+                final String path = '$dir/attestation_deplacement.pdf';
+                final File file = File(path);
+
+                File(path).delete();
+                Navigator.popAndPushNamed(context, "HomeScreen");
+              },
+            ),
+          ),
           title: Text("Attestation"),
           actions: <Widget>[
             IconButton(

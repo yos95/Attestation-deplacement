@@ -9,6 +9,7 @@ import 'package:confinement/widgets/WidgetTextfield.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_signature_pad/flutter_signature_pad.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -21,6 +22,8 @@ class attestationScreen extends StatefulWidget {
   _attestationScreenState createState() => _attestationScreenState();
 }
 
+enum Sexe { Homme, Femme }
+
 class _attestationScreenState extends State<attestationScreen> {
   brain brainA = new brain();
   TextEditingController controllerName, controllerVille, controllerAdresse;
@@ -30,6 +33,7 @@ class _attestationScreenState extends State<attestationScreen> {
   var motif = "Achats de première nécessité";
   var ville = "";
   var name = "";
+  bool sexe = true;
   DateTime date;
 
   List<String> listMotifs = [
@@ -74,6 +78,8 @@ class _attestationScreenState extends State<attestationScreen> {
     super.initState();
     restore();
   }
+
+  Sexe _defaultSexe = Sexe.Homme;
 
   @override
   Widget build(BuildContext context) {
@@ -204,9 +210,47 @@ class _attestationScreenState extends State<attestationScreen> {
                         ),
                       ),
                     ),
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Expanded(
+                            child: ListTile(
+                              title: const Text('Homme'),
+                              leading: Radio(
+                                value: Sexe.Homme,
+                                groupValue: _defaultSexe,
+                                onChanged: (Sexe value) {
+                                  setState(() {
+                                    _defaultSexe = value;
+                                    sexe = true;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: ListTile(
+                              title: const Text('Femme'),
+                              leading: Radio(
+                                value: Sexe.Femme,
+                                groupValue: _defaultSexe,
+                                onChanged: (Sexe value) {
+                                  setState(() {
+                                    _defaultSexe = value;
+                                    sexe = false;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10.0, top: 10, bottom: 10),
+                      padding:
+                          const EdgeInsets.only(left: 10.0, top: 2, bottom: 10),
                       child: Text("Signature",
                           style: TextStyle(
                               color: Colors.black54,
@@ -216,8 +260,8 @@ class _attestationScreenState extends State<attestationScreen> {
                     Expanded(
                       child: Container(
                         color: Colors.white,
-                        width: 400,
-                        height: 200,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Signature(
@@ -257,6 +301,7 @@ class _attestationScreenState extends State<attestationScreen> {
                             brain.formatedDateNow(DateTime.now().month);
                         dayNowFormated =
                             brain.formatedDateNow(DateTime.now().day);
+
                         var path = await brain.pdf(
                             img,
                             image,
@@ -267,8 +312,9 @@ class _attestationScreenState extends State<attestationScreen> {
                             dayNowFormated,
                             monthNowFormated,
                             yearNow,
-                            ville);
-                        print(path);
+                            ville,
+                            sexe);
+                        print(path.Bytes);
 
                         material.Navigator.of(context).push(
                           material.MaterialPageRoute(
