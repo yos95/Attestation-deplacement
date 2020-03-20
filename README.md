@@ -1,6 +1,6 @@
 # Attestation déplacement
 
-Première application android io d'attestation de déplacement
+Première application android ios d'attestation de déplacement
 
 ## Générateur d'attestation
 <p align="center">
